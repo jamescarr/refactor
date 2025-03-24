@@ -1,10 +1,11 @@
 # Epyon
 
-A command-line tool for safely refactoring Python imports. Named after the Gundam Epyon from Mobile Suit Gundam Wing, which represents perfect transformation and adaptation - much like how this tool helps you transform and adapt your Python imports with precision and reliability.
+A command-line tool for safely refactoring Python imports and moving definitions between modules. Named after the Gundam Epyon from Mobile Suit Gundam Wing, which represents perfect transformation and adaptation - much like how this tool helps you transform and adapt your Python code with precision and reliability.
 
 ## Features
 
 - Safe, precise import replacement using Python's concrete syntax tree (CST)
+- Move class and function definitions between modules while updating all imports
 - Preserves code formatting and comments
 - Handles complex import cases (aliased imports, multi-line imports)
 - Dry run mode to preview changes
@@ -21,22 +22,25 @@ pip install epyon
 
 ```bash
 # Replace a single import
-epyon replace "gundam.wing.zero.WingZero" "gundam.wing.custom.WingZeroCustom" path/to/files
+epyon replace-import "gundam.wing.zero.WingZero" "gundam.wing.custom.WingZeroCustom" path/to/files
 
 # Replace with aliased imports
-epyon replace "gundam.wing.epyon.BeamSaber" "gundam.wing.tallgeese.BeamSaber" path/to/files
+epyon replace-import "gundam.wing.epyon.BeamSaber" "gundam.wing.tallgeese.BeamSaber" path/to/files
 
 # Replace from multi-line imports
-epyon replace "gundam.wing.sandrock.HeatShortels" "gundam.wing.sandrock.custom.TwinHeatShortels" path/to/files
+epyon replace-import "gundam.wing.sandrock.HeatShortels" "gundam.wing.sandrock.custom.TwinHeatShortels" path/to/files
+
+# Move a class definition to a different module
+epyon move-def "gundam.wing.zero.WingZero" "gundam.wing.custom.WingZeroCustom" path/to/files
+
+# Move a function with dry run
+epyon move-def --dry-run "gundam.wing.utils.transform" "gundam.wing.core.transform" path/to/files
 
 # Show version
 epyon --version
 
 # Show help
 epyon --help
-
-# Dry run (show changes without applying them)
-epyon replace --dry-run "gundam.heavyarms.GatlingGuns" "gundam.heavyarms.custom.DualGatlingGuns" path/to/files
 ```
 
 ### Example Import Formats
@@ -55,6 +59,25 @@ from gundam.wing.pilots import (
 
 # Multiple imports on one line
 from gundam.wing.weapons import BeamSaber, BeamCannon, BusterRifle
+```
+
+### Example Definition Moves
+
+```python
+# Original file: gundam/wing/zero.py
+class WingZero:
+    """The Wing Zero Gundam."""
+    def transform(self):
+        pass
+
+# After moving to: gundam/wing/custom.py
+class WingZeroCustom:  # Name can be changed during move
+    """The Wing Zero Gundam."""
+    def transform(self):
+        pass
+
+# All imports are automatically updated
+from gundam.wing.custom import WingZeroCustom  # Updated automatically
 ```
 
 ## Development

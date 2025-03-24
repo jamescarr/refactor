@@ -2,7 +2,7 @@
 import pytest
 from pathlib import Path
 import libcst as cst
-from refactor.core.import_replacer import ImportReplacer, process_file, find_python_files
+from epyon.core.import_replacer import ImportReplacer, process_file, find_python_files
 
 def test_simple_import_replacement():
     """Test basic import replacement functionality."""

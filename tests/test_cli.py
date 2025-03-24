@@ -2,7 +2,7 @@
 from pathlib import Path
 import pytest
 from typer.testing import CliRunner
-from refactor.cli import app
+from epyon.cli import app
 
 runner = CliRunner()
 
@@ -10,7 +10,7 @@ def test_version():
     """Test the version command."""
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "refactor version: 0.1.0" in result.stdout
+    assert "epyon version: 0.1.0" in result.stdout
 
 def test_replace_import_nonexistent_path():
     """Test replace_import with a nonexistent path."""
@@ -53,46 +53,48 @@ def test_replace_import_dry_run(tmp_path):
     """Test replace_import with dry run option."""
     # Create a test Python file
     test_file = tmp_path / "test.py"
-    test_file.write_text("""
-from old.module import Class
-x = Class()
+    test_file.write_text("""from gundam.wing.zero import WingZero
+x = WingZero()
 """)
     
     result = runner.invoke(app, [
         "replace-import",
-        "old.module.Class",
-        "new.module.Class",
+        "gundam.wing.zero.WingZero",
+        "gundam.wing.custom.WingZeroCustom",
         str(test_file),
         "--dry-run"
     ])
     assert result.exit_code == 0
     assert "Running in dry-run mode" in result.stdout
+    assert "-from gundam.wing.zero import WingZero" in result.stdout
+    assert "+from gundam.wing.custom import WingZeroCustom" in result.stdout
     
     # Verify file wasn't modified
-    assert "from old.module import Class" in test_file.read_text()
+    assert "from gundam.wing.zero import WingZero" in test_file.read_text()
 
 def test_replace_import_actual_change(tmp_path):
     """Test replace_import with actual file modification."""
     # Create a test Python file
     test_file = tmp_path / "test.py"
-    test_file.write_text("""
-from old.module import Class
-x = Class()
+    test_file.write_text("""from gundam.wing.epyon import BeamSaber
+x = BeamSaber()
 """)
     
     result = runner.invoke(app, [
         "replace-import",
-        "old.module.Class",
-        "new.module.Class",
+        "gundam.wing.epyon.BeamSaber",
+        "gundam.wing.tallgeese.BeamSaber",
         str(test_file)
     ])
     assert result.exit_code == 0
     assert "Modified imports in 1 of 1 files" in result.stdout
+    assert "-from gundam.wing.epyon import BeamSaber" in result.stdout
+    assert "+from gundam.wing.tallgeese import BeamSaber" in result.stdout
     
     # Verify file was modified
     modified_content = test_file.read_text()
-    assert "from new.module import Class" in modified_content
-    assert "from old.module import Class" not in modified_content
+    assert "from gundam.wing.tallgeese import BeamSaber" in modified_content
+    assert "from gundam.wing.epyon import BeamSaber" not in modified_content
 
 def test_replace_import_multiple_files(tmp_path):
     """Test replace_import with multiple Python files."""
@@ -159,32 +161,37 @@ def test_verbose_output(tmp_path):
 def test_replace_import_parenthesized(tmp_path):
     """Test replacing an import from a parenthesized group."""
     test_file = tmp_path / "test.py"
-    test_file.write_text("""
-from foo.bar.baz import (
-    Foo,
-    Bar,
-    Baz
+    test_file.write_text("""from gundam.wing.pilots import (
+    HeeroYuy,
+    DuoMaxwell,
+    TrowaBarton
 )
 
-x = Foo()
-y = Bar()
-z = Baz()
+x = HeeroYuy()
+y = DuoMaxwell()
+z = TrowaBarton()
 """)
     
     result = runner.invoke(app, [
         "replace-import",
-        "foo.bar.baz.Foo",
-        "lorem.ipsum.dolor.Sit",
+        "gundam.wing.pilots.DuoMaxwell",
+        "gundam.wing.pilots.QuatraWinner",
         str(test_file)
     ])
     assert result.exit_code == 0
     assert "Modified imports in 1 of 1 files" in result.stdout
+    assert "-    DuoMaxwell," in result.stdout
+    assert "     HeeroYuy," in result.stdout
+    assert "     TrowaBarton" in result.stdout
+    assert "+from gundam.wing.pilots import QuatraWinner" in result.stdout
     
     # Verify file was modified correctly
     modified_content = test_file.read_text()
-    assert "from lorem.ipsum.dolor import Sit" in modified_content
-    assert "from foo.bar.baz import (" in modified_content
-    assert "Bar," in modified_content
-    assert "Baz" in modified_content
-    assert "Foo," not in modified_content  # Foo should be removed
-    assert ")" in modified_content 
+    
+    # The import statements should be at the start of the file
+    import_section = modified_content.split('\n\n')[0]
+    assert "from gundam.wing.pilots import QuatraWinner" in import_section
+    assert "from gundam.wing.pilots import (" in import_section
+    assert "HeeroYuy," in import_section
+    assert "TrowaBarton" in import_section
+    assert "DuoMaxwell" not in import_section 

@@ -5,6 +5,7 @@ from typing import Tuple, List
 from pathlib import Path
 
 from ..display import display
+from .utils import find_python_files
 
 class ImportReplacer(cst.CSTTransformer):
     """Transform imports in a Python module using libCST."""

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "epyon"
-version = "0.1.0"
+version = "0.1.3"
 description = "A command-line tool for safely refactoring Python imports, named after the transformative Gundam Epyon"
 readme = "README.md"
 requires-python = ">=3.8"
