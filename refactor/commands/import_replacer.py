@@ -2,12 +2,10 @@
 from pathlib import Path
 from typing import Optional
 import typer
-from rich.console import Console
 
 from ..core.import_replacer import process_file, find_python_files
+from ..display import display
 from .base import Command, register_command
-
-console = Console()
 
 @register_command
 class ImportReplacerCommand(Command):
@@ -29,13 +27,13 @@ class ImportReplacerCommand(Command):
         ) -> None:
             """Replace imports in Python files."""
             if not path.exists():
-                console.print(f"[red]Error: Path '{path}' does not exist[/]")
+                display.error(f"Path '{path}' does not exist")
                 raise typer.Exit(1)
             
             # Process a single file
             if path.is_file():
                 if not str(path).endswith('.py'):
-                    console.print(f"[red]Error: Path must be a Python file[/]")
+                    display.error("Path must be a Python file")
                     raise typer.Exit(1)
                 files = [path]
             
@@ -43,7 +41,7 @@ class ImportReplacerCommand(Command):
             else:
                 files = find_python_files(path)
                 if not files:
-                    console.print(f"[yellow]Warning: No Python files found in {path}[/]")
+                    display.warning(f"No Python files found in {path}")
                     return
             
             # Process each file
@@ -54,9 +52,6 @@ class ImportReplacerCommand(Command):
             
             # Show summary
             if dry_run:
-                console.print("\n[yellow]Running in dry-run mode - no files were modified[/]")
+                display.show_dry_run_notice()
             
-            if modified_count > 0:
-                console.print(f"\n[green]Modified imports in {modified_count} of {len(files)} files[/]")
-            else:
-                console.print("\n[yellow]No matching imports found[/]") 
+            display.show_summary(modified_count, len(files)) 

@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 """Command-line interface for the refactor tool."""
 import typer
-from rich.console import Console
 from typing import Optional
 
 from . import __version__
 from .commands import CommandRegistry
+from .display import display
 
 app = typer.Typer(
     name="refactor",
     help="Python refactoring tool using libCST",
     add_completion=False,
 )
-console = Console()
 
 def version_callback(value: bool) -> None:
     """Show version and exit."""
     if value:
-        console.print(f"refactor version: {__version__}")
+        display.show_version(__version__)
         raise typer.Exit()
 
 @app.callback()

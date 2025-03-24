@@ -1,12 +1,10 @@
+"""Core functionality for import replacement."""
 import libcst as cst
 from libcst import matchers as m
 from typing import Tuple, List
 from pathlib import Path
-from rich.console import Console
-from rich.syntax import Syntax
 
-# Create a console instance for rich output
-console = Console()
+from ..display import display
 
 class ImportReplacer(cst.CSTTransformer):
     """Transform imports in a Python module using libCST."""
@@ -104,7 +102,6 @@ class ImportReplacer(cst.CSTTransformer):
             )
 
             # Add to the beginning of the imports section
-            # This is a simplification; a more robust approach would consider import order
             return updated_node.with_changes(
                 body=[new_import] + list(updated_node.body)
             )
@@ -140,24 +137,22 @@ def process_file(file_path: Path, old_import: str, new_import: str, dry_run: boo
             modified_code = modified_module.code
 
             # Show the changes
-            console.print(f"[bold green]Changes in {file_path}:[/]")
-            syntax = Syntax(modified_code, "python", theme="monokai", line_numbers=True)
-            console.print(syntax)
+            display.show_code(modified_code, file_path)
 
             # Write changes if not in dry run mode
             if not dry_run:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(modified_code)
-                console.print(f"[bold green]Updated {file_path}[/]")
+                display.success(f"Updated {file_path}")
             else:
-                console.print("[bold yellow]Dry run - no changes written[/]")
+                display.warning("Dry run - no changes written")
 
             return True
 
         return False
 
     except Exception as e:
-        console.print(f"[bold red]Error processing {file_path}: {str(e)}[/]")
+        display.error(f"Error processing {file_path}: {str(e)}")
         return False
 
 
