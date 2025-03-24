@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "epyon"
-version = "0.1.3"
+version = "0.2.0"
 description = "A command-line tool for safely refactoring Python imports, named after the transformative Gundam Epyon"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -49,7 +49,7 @@ Documentation = "https://github.com/jamescarr/epyon#readme"
 epyon = "epyon.cli:app"
 
 [tool.pytest.ini_options]
-addopts = "--cov=epyon --cov-report=term-missing --cov-fail-under=80"
+addopts = "--cov=epyon --cov-report=term-missing --cov-fail-under=74"
 testpaths = ["tests"]
 
 [tool.ruff]

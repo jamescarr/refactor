@@ -1,11 +1,11 @@
 """Core functionality for moving definitions between modules."""
 import libcst as cst
 from libcst import matchers as m
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Set
 from pathlib import Path
 
 from ..display import display
-from .utils import find_python_files
+from .utils import find_python_files, build_import_map, process_files_parallel
 
 class DefinitionExtractor(cst.CSTTransformer):
     """Extract a class or function definition from a module."""
@@ -116,4 +116,95 @@ def process_file_move(
 def find_module_file(module_path: str, search_path: Path) -> Optional[Path]:
     """Find a Python file corresponding to a module path."""
     file_path = search_path / (module_path.replace('.', '/') + '.py')
-    return file_path if file_path.exists() else None 
+    return file_path if file_path.exists() else None
+
+def find_relevant_files(directory: Path, old_path: str) -> Set[Path]:
+    """
+    Find files that are likely to contain the definition or its imports.
+    Uses ast for fast import scanning.
+    """
+    # Build a map of imports to files
+    import_map = build_import_map(directory)
+    
+    # Find files that import the target
+    relevant_files = set()
+    old_module, name = _split_import(old_path)
+    
+    # Add files that import the module or the specific name
+    for import_path, files in import_map.items():
+        if import_path == old_path or import_path == old_module:
+            relevant_files.update(files)
+    
+    # Add the source and target module files
+    source_file = find_module_file(old_module, directory)
+    if source_file:
+        relevant_files.add(source_file)
+    
+    return relevant_files
+
+def move_definition(
+    directory: Path,
+    old_path: str,
+    new_path: str,
+    dry_run: bool = False,
+    max_workers: Optional[int] = None
+) -> int:
+    """
+    Move a class or function definition between modules.
+    Uses parallel processing and smart file selection for speed.
+    
+    Args:
+        directory: Root directory to process
+        old_path: Original import path (e.g., 'foo.bar.Baz')
+        new_path: New import path (e.g., 'lorem.ipsum.Baz')
+        dry_run: If True, don't modify files
+        max_workers: Maximum number of parallel workers
+    
+    Returns:
+        int: Number of files modified
+    """
+    # Find relevant files
+    display.info("Scanning for relevant files...")
+    files = list(find_relevant_files(directory, old_path))
+    if not files:
+        display.warning(f"No Python files found that use {old_path}")
+        return 0
+    
+    display.info(f"Found {len(files)} relevant files")
+    
+    # First pass: extract the definition
+    extracted_def = None
+    old_module, name = _split_import(old_path)
+    source_file = find_module_file(old_module, directory)
+    
+    if source_file:
+        changes_made, extracted_def = process_file_move(
+            source_file,
+            old_path,
+            new_path,
+            dry_run=dry_run
+        )
+        if not extracted_def:
+            display.error(f"Could not find definition for {old_path}")
+            return 0
+    else:
+        display.error(f"Could not find source module for {old_path}")
+        return 0
+    
+    # Second pass: update imports in parallel
+    results = process_files_parallel(
+        files,
+        process_file_move,
+        old_path,
+        new_path,
+        extracted_def=extracted_def,
+        dry_run=dry_run,
+        max_workers=max_workers
+    )
+    
+    modified_count = sum(1 for r in results if r)
+    
+    if dry_run:
+        display.show_dry_run_notice()
+    
+    return modified_count 

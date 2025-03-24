@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 from epyon.cli import app
+from epyon import __version__
 
 runner = CliRunner()
 
@@ -10,7 +11,7 @@ def test_version():
     """Test the version command."""
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "epyon version: 0.1.0" in result.stdout
+    assert f"Epyon version {__version__}" in result.stdout
 
 def test_replace_import_nonexistent_path():
     """Test replace_import with a nonexistent path."""

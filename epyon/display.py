@@ -3,10 +3,11 @@ from rich.console import Console
 from rich.syntax import Syntax
 from rich.theme import Theme
 from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeElapsedColumn
 from rich import print as rprint
 from difflib import unified_diff
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Any
 
 # Create a custom theme for Gundam-inspired colors
 theme = Theme({
@@ -24,7 +25,11 @@ console = Console(theme=theme)
 
 class Display:
     """Display utilities for Epyon."""
-
+    
+    def __init__(self):
+        """Initialize the display with default settings."""
+        self.verbose = False
+    
     @staticmethod
     def show_diff(old_content: str, new_content: str, file_path: Optional[Path] = None) -> None:
         """Display a unified diff of the changes."""
@@ -63,25 +68,26 @@ class Display:
             console.print(f"\n[path]{file_path}[/path]")
         console.print(syntax)
 
-    @staticmethod
-    def error(message: str) -> None:
+    def error(self, message: str) -> None:
         """Display an error message."""
         console.print(f"[error]Error:[/error] {message}")
 
-    @staticmethod
-    def warning(message: str) -> None:
+    def warning(self, message: str) -> None:
         """Display a warning message."""
         console.print(f"[warning]Warning:[/warning] {message}")
 
-    @staticmethod
-    def success(message: str) -> None:
+    def success(self, message: str) -> None:
         """Display a success message."""
         console.print(f"[success]Success:[/success] {message}")
 
-    @staticmethod
-    def info(message: str) -> None:
+    def info(self, message: str) -> None:
         """Display an info message."""
-        console.print(f"[info]Info:[/info] {message}")
+        if self.verbose:
+            console.print(f"[info]Info:[/info] {message}")
+        else:
+            # Only show important info messages in non-verbose mode
+            if message.startswith("Found") or message.startswith("Modified") or message.startswith("Scanning"):
+                console.print(f"[info]Info:[/info] {message}")
 
     @staticmethod
     def operation_summary(total: int, modified: int, errors: int = 0) -> None:
@@ -105,11 +111,37 @@ class Display:
             console.print(f"\n[green]Modified imports in {modified_count} of {total_files} files[/]")
         else:
             console.print("\n[yellow]No matching imports found[/]")
-
+            
     @staticmethod
     def show_version(version: str) -> None:
         """Display version information."""
-        console.print(f"epyon version: {version}")
-
+        console.print(f"[bold cyan]Epyon[/bold cyan] version [bold]{version}[/bold]")
+        
+    def track_parallel_progress(self, items: List[Any], description: str = "Processing") -> None:
+        """
+        Track progress of parallel operations.
+        Only shows progress if verbose mode is enabled.
+        
+        Args:
+            items: List of items being processed
+            description: Description of the operation
+        """
+        if not self.verbose:
+            return
+            
+        total_items = len(items)
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            TimeElapsedColumn(),
+        ) as progress:
+            task = progress.add_task(f"[cyan]{description}...", total=total_items)
+            
+            # This is just a placeholder - actual progress tracking would require modifications
+            # to the parallel processing functions to update progress
+            progress.update(task, completed=total_items)
+            
 # Create a singleton instance
 display = Display() 

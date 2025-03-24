@@ -5,7 +5,7 @@ from typing import Tuple, List
 from pathlib import Path
 
 from ..display import display
-from .utils import find_python_files
+from .utils import find_python_files, process_files_parallel
 
 class ImportReplacer(cst.CSTTransformer):
     """Transform imports in a Python module using libCST."""
@@ -156,11 +156,45 @@ def process_file(file_path: Path, old_import: str, new_import: str, dry_run: boo
         display.error(f"Error processing {file_path}: {str(e)}")
         return False
 
-
-def find_python_files(directory: Path) -> List[Path]:
-    """Recursively find all Python files in a directory."""
-    python_files = []
-    for path in directory.rglob('*.py'):
-        if path.is_file():
-            python_files.append(path)
-    return python_files
+def replace_import(
+    directory: Path,
+    old_import: str,
+    new_import: str,
+    dry_run: bool = False,
+    max_workers: int = None
+) -> int:
+    """
+    Replace imports across Python files in a directory.
+    
+    Args:
+        directory: Root directory to process
+        old_import: Original import path (e.g., 'foo.bar.Baz')
+        new_import: New import path (e.g., 'lorem.ipsum.Baz')
+        dry_run: If True, don't modify files
+        max_workers: Maximum number of parallel workers
+    
+    Returns:
+        int: Number of files modified
+    """
+    python_files = find_python_files(directory)
+    if not python_files:
+        display.warning(f"No Python files found in {directory}")
+        return 0
+    
+    display.info(f"Searching {len(python_files)} files")
+    
+    results = process_files_parallel(
+        python_files,
+        process_file,
+        old_import,
+        new_import,
+        dry_run=dry_run,
+        max_workers=max_workers
+    )
+    
+    modified_count = sum(1 for r in results if r)
+    
+    if dry_run:
+        display.show_dry_run_notice()
+    
+    return modified_count

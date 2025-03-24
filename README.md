@@ -6,6 +6,7 @@ A command-line tool for safely refactoring Python imports and moving definitions
 
 - Safe, precise import replacement using Python's concrete syntax tree (CST)
 - Move class and function definitions between modules while updating all imports
+- Replace method and function calls throughout your codebase
 - Preserves code formatting and comments
 - Handles complex import cases (aliased imports, multi-line imports)
 - Dry run mode to preview changes
@@ -35,6 +36,15 @@ epyon move-def "gundam.wing.zero.WingZero" "gundam.wing.custom.WingZeroCustom" p
 
 # Move a function with dry run
 epyon move-def --dry-run "gundam.wing.utils.transform" "gundam.wing.core.transform" path/to/files
+
+# Replace method calls across your codebase
+epyon replace-call "self.assert_401_UNAUTHORIZED" "self.assert_403_FORBIDDEN" path/to/tests
+
+# Replace method calls with arguments
+epyon replace-call "self.assertEqual(404, response.status_code)" "self.assertEquals(response.status_code, 404)" 
+
+# Parallel processing for large codebases
+epyon replace-call "client.get_item" "client.get_resource" --workers 4
 
 # Show version
 epyon --version
@@ -78,6 +88,24 @@ class WingZeroCustom:  # Name can be changed during move
 
 # All imports are automatically updated
 from gundam.wing.custom import WingZeroCustom  # Updated automatically
+```
+
+### Example Call Replacements
+
+```python
+# Before
+def test_unauthorized_access(self):
+    response = self.client.get('/protected')
+    self.assert_401_UNAUTHORIZED(response)
+
+# After running: epyon replace-call "self.assert_401_UNAUTHORIZED" "self.assert_403_FORBIDDEN"
+def test_unauthorized_access(self):
+    response = self.client.get('/protected')
+    self.assert_403_FORBIDDEN(response)
+
+# Works with nested attributes too
+self.client.request.assert_success(response)  # Before
+self.client.assert_request_success(response)  # After
 ```
 
 ## Development
