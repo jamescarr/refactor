@@ -1,3 +1,3 @@
-"""Python refactoring tool using libCST."""
+"""Python import refactoring tool."""
 
 __version__ = "0.1.0" 

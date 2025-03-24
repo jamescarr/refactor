@@ -21,7 +21,7 @@ def test_replace_import_nonexistent_path():
         "nonexistent_path"
     ])
     assert result.exit_code == 1
-    assert "Error: Path 'nonexistent_path' does not exist." in result.stdout
+    assert "Error: Path 'nonexistent_path' does not exist" in result.stdout
 
 def test_replace_import_invalid_path(tmp_path):
     """Test replace_import with an invalid file (not a Python file)."""
@@ -36,7 +36,7 @@ def test_replace_import_invalid_path(tmp_path):
     ])
     assert result.exit_code == 1
     assert "Error: Path" in result.stdout
-    assert "must be a Python file" in result.stdout
+    assert "must be a Python file" in result.stdout.replace("\n", " ")
 
 def test_replace_import_empty_directory(tmp_path):
     """Test replace_import with an empty directory."""
@@ -147,11 +147,11 @@ x = Class()
 def test_verbose_output(tmp_path):
     """Test verbose output option."""
     result = runner.invoke(app, [
-        "--verbose",
         "replace-import",
         "old.module.Class",
         "new.module.Class",
-        str(tmp_path)
+        str(tmp_path),
+        "--verbose"
     ])
     assert result.exit_code == 0
     assert "Warning: No Python files found" in result.stdout
