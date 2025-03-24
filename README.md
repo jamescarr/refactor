@@ -1,143 +1,86 @@
-# Refactor
+# Epyon
 
-A command-line tool for safely refactoring Python imports across your codebase. Built with libCST for reliable Python code transformations.
+A command-line tool for safely refactoring Python imports. Named after the Gundam Epyon from Mobile Suit Gundam Wing, which represents perfect transformation and adaptation - much like how this tool helps you transform and adapt your Python imports with precision and reliability.
 
 ## Features
 
-- Replace imports across multiple Python files
-- Handles various import formats:
-  - Simple imports (`from foo import bar`)
-  - Multi-line imports
-  - Parenthesized imports (`from foo import (bar, baz)`)
+- Safe, precise import replacement using Python's concrete syntax tree (CST)
 - Preserves code formatting and comments
-- Dry-run mode to preview changes
-- Verbose output option
+- Handles complex import cases (aliased imports, multi-line imports)
+- Dry run mode to preview changes
+- Verbose output option for detailed operation logging
+- Works with single files or entire directories
 
 ## Installation
 
 ```bash
-# Install from PyPI
-pip install refactor
-
-# Or install from source
-git clone https://github.com/jamescarr/refactor.git
-cd refactor
-make install
+pip install epyon
 ```
 
 ## Usage
 
-### Basic Usage
-
 ```bash
-refactor replace-import OLD_IMPORT NEW_IMPORT PATH
+# Replace a single import
+epyon replace "gundam.wing.zero.WingZero" "gundam.wing.custom.WingZeroCustom" path/to/files
+
+# Replace with aliased imports
+epyon replace "gundam.wing.epyon.BeamSaber" "gundam.wing.tallgeese.BeamSaber" path/to/files
+
+# Replace from multi-line imports
+epyon replace "gundam.wing.sandrock.HeatShortels" "gundam.wing.sandrock.custom.TwinHeatShortels" path/to/files
+
+# Show version
+epyon --version
+
+# Show help
+epyon --help
+
+# Dry run (show changes without applying them)
+epyon replace --dry-run "gundam.heavyarms.GatlingGuns" "gundam.heavyarms.custom.DualGatlingGuns" path/to/files
 ```
 
-Examples:
-```bash
-# Replace a single import in a file
-refactor replace-import old.module.Class new.module.Class path/to/file.py
-
-# Replace imports in all Python files in a directory
-refactor replace-import old.module.Class new.module.Class path/to/directory
-
-# Preview changes without modifying files (dry-run)
-refactor replace-import old.module.Class new.module.Class path/to/file.py --dry-run
-
-# Show verbose output
-refactor replace-import old.module.Class new.module.Class path/to/file.py --verbose
-```
-
-### Supported Import Formats
-
-The tool handles various import formats:
+### Example Import Formats
 
 ```python
 # Simple imports
-from foo.bar import baz
-from foo.bar import baz as alias
+from gundam.wing import WingZero
+from gundam.epyon import BeamSaber as EpyonSaber
 
 # Multi-line imports
-from foo.bar import (
-    baz,
-    qux,
-    quux
+from gundam.wing.pilots import (
+    HeeroYuy,
+    DuoMaxwell,
+    TrowaBarton
 )
 
 # Multiple imports on one line
-from foo.bar import baz, qux, quux
-```
-
-### Command-Line Options
-
-```bash
-Options:
-  --version                   Show version information
-  --verbose                   Enable verbose output
-  --dry-run                  Preview changes without modifying files
-  --help                     Show this help message and exit
+from gundam.wing.weapons import BeamSaber, BeamCannon, BusterRifle
 ```
 
 ## Development
 
-### Prerequisites
-
-- Python 3.6 or higher
-- make (for development commands)
-
-### Available Make Commands
-
-- `make install`: Install the package
-- `make dev`: Install development dependencies
-- `make test`: Run the test suite
-- `make lint`: Run the linter
-- `make clean`: Clean build artifacts
-
-### Running Tests
-
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/epyon.git
+cd epyon
+
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Run tests
 make test
-```
 
-The test suite includes comprehensive tests for:
-- Version command
-- Import replacement functionality
-- File handling
-- Dry run mode
-- Multiple file processing
-- Error cases
-- Command-line interface
-- Verbose output
-
-### Code Style
-
-This project uses `ruff` for linting. To check your code:
-
-```bash
+# Run linter
 make lint
 ```
 
 ## Contributing
 
-1. Fork the repository
-2. Create a new branch for your feature
-3. Make your changes
-4. Run the tests and linter
-5. Submit a Pull Request
-
-### Commit Messages
-
-Please follow conventional commits format:
-- `feat:` for new features
-- `fix:` for bug fixes
-- `docs:` for documentation changes
-- `refactor:` for code refactoring
-- `test:` for adding tests
-- `chore:` for maintenance tasks
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - see LICENSE file for details.
 
 ## Acknowledgments
 
@@ -152,7 +95,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 1. **Installation Problems**
    ```bash
    # If you encounter permission issues
-   pip install --user refactor
+   pip install --user epyon
    ```
 
 2. **Version Conflicts**
@@ -160,7 +103,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
    # Install in an isolated environment
    python -m venv venv
    source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-   pip install refactor
+   pip install epyon
    ```
 
 3. **Path Issues**
@@ -168,4 +111,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
    - For files, ensure they have a `.py` extension
    - For directories, ensure they contain Python files
 
-For more issues, please check the [GitHub Issues](https://github.com/jamescarr/refactor/issues) page.
+For more issues, please check the [GitHub Issues](https://github.com/jamescarr/epyon/issues) page.
