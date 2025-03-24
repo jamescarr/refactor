@@ -1,70 +1,58 @@
-[project]
-name = "refactor"
-version = "0.1.1"
-description = "Python refactoring tool using libCST"
-authors = [
-    {name = "James R. Carr", email = "james.r.carr@gmail.com"}
-]
-readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
-dependencies = [
-    "typer>=0.9.0",
-    "libcst>=1.1.0",
-    "rich>=13.4.2",
-]
-
-[project.optional-dependencies]
-test = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
-]
-dev = [
-    "ruff>=0.2.0",
-]
-
-[project.scripts]
-refactor = "refactor.cli:app"
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.wheel]
-packages = ["refactor"]
+[project]
+name = "refactor"
+version = "0.1.0"
+description = "A command-line tool for safely refactoring Python imports"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [
+    { name = "James Carr", email = "james.freaking.carr@gmail.com" },
+]
+keywords = ["refactoring", "imports", "python", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "libcst>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/jamescarr/refactor"
+Repository = "https://github.com/jamescarr/refactor.git"
+Documentation = "https://github.com/jamescarr/refactor#readme"
+"Bug Tracker" = "https://github.com/jamescarr/refactor/issues"
+
+[project.scripts]
+refactor = "refactor.cli:app"
 
 [tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q --cov=refactor --cov-report=term-missing"
-testpaths = [
-    "tests",
-]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
+addopts = "--cov=refactor --cov-report=term-missing --cov-fail-under=80"
+testpaths = ["tests"]
 
-[tool.coverage.run]
-source = ["refactor"]
-branch = true
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
-    "pass",
-    "raise ImportError",
-]
-ignore_errors = true
-fail_under = 80
-
-[tool.uv]
-lint.select = ["F", "E", "W"]
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+select = ["E", "F", "B", "I"]
