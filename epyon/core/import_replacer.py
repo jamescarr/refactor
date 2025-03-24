@@ -136,8 +136,8 @@ def process_file(file_path: Path, old_import: str, new_import: str, dry_run: boo
         if transformer.changes_made:
             modified_code = modified_module.code
 
-            # Show the changes
-            display.show_code(modified_code, file_path)
+            # Show the changes as a diff
+            display.show_diff(source_code, modified_code, file_path)
 
             # Write changes if not in dry run mode
             if not dry_run:
