@@ -112,7 +112,7 @@ self.client.assert_request_success(response)  # After
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/epyon.git
+git clone https://github.com/jamescarr/refactor.git
 cd epyon
 
 # Install development dependencies
